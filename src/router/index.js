@@ -1,22 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '@/layouts/App.vue'
+import DashboardLayout from '@/layouts/DashboardLayout.vue'
 
 const routes = [
-        {
-          path: '/',
-          component: AppLayout,
-          children: [
-            {
-        path: '/dashboard',
-        component: () => import('@/layouts/DashboardLayout.vue'),
-        children: [
-          {
-            path: '',
-            name: 'dashboard',
-            component: () => import('@/views/Dashboard.vue')
-          }
-        ]
-      },
+  {
+    path: '/',
+    component: AppLayout,
+    children: [
       {
         path: '',
         name: 'home',
@@ -61,6 +51,23 @@ const routes = [
         name: 'contact',
         component: () => import('@/views/Contact.vue'),
         meta: { breadcrumb: 'Contact' }
+      }
+    ]
+  },
+  {
+    path: '/dashboard',
+    /* AREA PENYELENGGARA ACARA (DASHBOARD) */
+    component: DashboardLayout,
+    children: [
+      {
+        path: '',
+        name: 'dashboard-overview',
+        component: () => import('@/views/Dashboard.vue')
+      },
+      {
+        path: 'events',
+        name: 'dashboard-events',
+        component: () => import('@/views/EventManagement.vue')
       }
     ]
   }
