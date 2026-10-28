@@ -10,7 +10,7 @@ defineProps({
   },
   message: {
     type: String,
-    default: 'Are you sure you want to proceed with this action?'
+    default: ''
   },
   confirmText: {
     type: String,
@@ -19,6 +19,22 @@ defineProps({
   cancelText: {
     type: String,
     default: 'Cancel'
+  },
+  showCancel: {
+    type: Boolean,
+    default: true
+  },
+  variant: {
+    type: String,
+    default: 'danger'
+  },
+  badgeText: {
+    type: String,
+    default: ''
+  },
+  badgeVariant: {
+    type: String,
+    default: ''
   }
 });
 
@@ -30,20 +46,24 @@ defineEmits(['confirm', 'close']);
     <div v-if="isOpen" class="modal-overlay" @click.self="$emit('close')">
       <div class="modal-card">
         <div class="modal-header">
-          <div class="modal-icon">⚠️</div>
+          <span v-if="badgeText" :class="['modal-badge', `badge-${badgeVariant || variant}`]">
+            {{ badgeText }}
+          </span>
           <h3 class="modal-title">{{ title }}</h3>
         </div>
         <div class="modal-body">
-          <p class="modal-message">{{ message }}</p>
+          <p v-if="message" class="modal-message">{{ message }}</p>
           <slot />
         </div>
         <div class="modal-footer">
-          <button class="btn-cancel" @click="$emit('close')">
-            {{ cancelText }}
-          </button>
-          <button class="btn-confirm" @click="$emit('confirm')">
-            {{ confirmText }}
-          </button>
+          <slot name="footer">
+            <button v-if="showCancel" class="btn-cancel" @click="$emit('close')">
+              {{ cancelText }}
+            </button>
+            <button :class="['btn-confirm', `btn-${variant}`]" @click="$emit('confirm')">
+              {{ confirmText }}
+            </button>
+          </slot>
         </div>
       </div>
     </div>
@@ -66,109 +86,69 @@ defineEmits(['confirm', 'close']);
   z-index: 9999;
   padding: var(--space-4);
 }
-
 .modal-card {
   background: white;
   width: 100%;
-  max-width: 460px;
+  max-width: 480px;
   border-radius: var(--space-4);
   padding: var(--space-6);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   border: 1px solid var(--border-color);
   animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
 @keyframes scaleUp {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
-
 .modal-header {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
+  flex-direction: column;
+  gap: var(--space-2);
   margin-bottom: var(--space-3);
 }
-
-.modal-icon {
-  font-size: 1.8rem;
-  line-height: 1;
-}
-
-.modal-title {
-  font-size: 1.25rem;
+.modal-badge {
+  align-self: flex-start;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: var(--text-main);
-  margin: 0;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
 }
-
-.modal-body {
-  margin-bottom: var(--space-6);
-}
-
-.modal-message {
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin: 0;
-}
-
+.badge-success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+.badge-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.modal-title { font-size: 1.35rem; font-weight: 700; color: var(--text-main); margin: 0; }
+.modal-body { margin-bottom: var(--space-4); }
+.modal-message { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin: 0 0 var(--space-4) 0; }
 .modal-footer {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
 }
-
 .btn-cancel {
   background: var(--bg-light);
   color: var(--text-muted);
   border: 1px solid var(--border-color);
-  padding: var(--space-2) var(--space-4);
+  padding: 10px 20px;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s;
 }
-
-.btn-cancel:hover {
-  background: #e2e8f0;
-  color: var(--text-main);
-}
-
 .btn-confirm {
-  background: #e63946;
   color: white;
   border: none;
-  padding: var(--space-2) var(--space-5);
+  padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 0.95rem;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.15s;
 }
-
-.btn-confirm:hover {
-  background: #d62828;
-}
-
-.btn-confirm:active {
-  transform: scale(0.98);
-}
-
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: opacity 0.25s ease;
-}
-
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
-}
+.btn-confirm.btn-primary { background: var(--primary); }
+.btn-confirm.btn-danger { background: #e63946; }
+.btn-confirm.btn-success { background: #16a34a; }
+.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.25s ease; }
+.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
 </style>
